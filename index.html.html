@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>¡Feliz Aniversario! ❤️️</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Montserrat:wght@300;400;500;600&family=Great+Vibes&display=swap" rel="stylesheet">
+    <!-- Canvas Confetti Library -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        wine: {
+                            800: '#58111A',
+                            900: '#3B0A11',
+                            950: '#230408',
+                        },
+                        roseGold: '#B8860B',
+                        gold: {
+                            light: '#F3E5AB',
+                            DEFAULT: '#D4AF37',
+                            dark: '#AA7C11'
+                        },
+                        cream: '#FAF6F0'
+                    },
+                    fontFamily: {
+                        serif: ['Cormorant Garamond', 'serif'],
+                        sans: ['Montserrat', 'sans-serif'],
+                        script: ['Great Vibes', 'cursive']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #230408;
+            color: #FAF6F0;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism visual effect */
+        .glass-card {
+            background: rgba(59, 10, 17, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+        }
+
+        .gold-border-gradient {
+            border-image: linear-gradient(to right, #AA7C11, #F3E5AB, #AA7C11) 1;
+        }
+
+        .gold-text {
+            background: linear-gradient(135deg, #FFF8DC 0%, #D4AF37 50%, #AA7C11 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Envelope interactive animation */
+        .envelope-wrapper {
+            perspective: 1000px;
+        }
+
+        .envelope {
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s ease-in-out;
+        }
+
+        /* Falling petals canvas overlay */
+        #petals-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="font-sans antialiased min-h-screen relative flex flex-col justify-between selection:bg-gold selection:text-wine-950">
+
+    <canvas id="petals-canvas"></canvas>
+
+    <!-- Navigation Header -->
+    <header class="w-full py-6 px-4 text-center z-20">
+        <span class="font-script text-3xl sm:text-4xl gold-text">Nuestra Historia</span>
+    </header>
+
+    <main class="container mx-auto px-4 py-8 max-w-4xl z-20 flex-grow flex flex-col justify-center items-center">
+        
+        <!-- Main Card Container -->
+        <div class="glass-card w-full rounded-2xl p-6 sm:p-12 text-center relative overflow-hidden my-6 border border-gold/30">
+            <!-- Decorative Corners -->
+            <div class="absolute top-3 left-3 text-gold/40 text-xl">✦</div>
+            <div class="absolute top-3 right-3 text-gold/40 text-xl">✦</div>
+            <div class="absolute bottom-3 left-3 text-gold/40 text-xl">✦</div>
+            <div class="absolute bottom-3 right-3 text-gold/40 text-xl">✦</div>
+
+            <!-- Header Title -->
+            <p class="font-sans text-xs sm:text-sm uppercase tracking-[0.3em] text-gold/80 mb-3">Celebración Especial</p>
+            <h1 class="font-serif text-4xl sm:text-6xl md:text-7xl font-bold mb-6 gold-text tracking-wide">
+                ¡Feliz Aniversario!
+            </h1>
+            
+            <div class="w-24 h-0.5 bg-gradient-to-r from-transparent via-gold to-transparent mx-auto mb-8"></div>
+
+            <!-- Envelope / Interactive Reveal Container -->
+            <div id="interactive-letter" class="my-8">
+                <div id="envelope-closed" class="cursor-pointer group transition-transform hover:scale-105 duration-300 inline-block">
+                    <div class="bg-wine-900 border-2 border-gold/50 rounded-xl p-8 sm:p-10 shadow-2xl relative max-w-md mx-auto flex flex-col items-center">
+                        <div class="w-16 h-16 rounded-full bg-gold/10 border border-gold/40 flex items-center justify-center mb-4 group-hover:bg-gold/20 transition">
+                            <i class="fa-solid font-serif text-gold text-2xl">💌</i>
+                        </div>
+                        <h2 class="font-serif text-2xl text-cream mb-2">Tienes una invitación especial</h2>
+                        <p class="text-xs text-gold/70 tracking-widest uppercase mb-4">Haz clic para abrir</p>
+                        <button onclick="revealInvitation()" class="mt-2 bg-gradient-to-r from-gold-dark via-gold to-gold-dark text-wine-950 font-semibold px-6 py-2.5 rounded-full shadow-lg hover:brightness-110 transition duration-300 text-sm tracking-wider uppercase">
+                            Abrir Carta ✨
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Hidden Revealed Invitation Content -->
+                <div id="invitation-content" class="hidden opacity-0 transition-opacity duration-1000 space-y-8">
+                    
+                    <!-- Highlighted Message -->
+                    <div class="bg-wine-900/60 border border-gold/40 rounded-xl p-6 sm:p-8 backdrop-blur-md shadow-inner">
+                        <p class="font-serif text-2xl sm:text-3xl text-cream leading-relaxed italic">
+                            "Vas a tener una cita romántica conmigo este sábado 3 de octubre en el restaurante <span class="gold-text font-semibold not-italic">Azia</span>"
+                        </p>
+                    </div>
+
+                    <!-- Romantic Phrase Section -->
+                    <div class="py-4">
+                        <p class="font-script text-5xl sm:text-7xl text-gold drop-shadow-md py-2">
+                            Ti amo cosiiiii
+                        </p>
+                        <p class="text-xs tracking-widest uppercase text-cream/60 mt-2">Por siempre y para siempre ❤️</p>
+                    </div>
+
+                    <!-- Countdown Timer -->
+                    <div class="pt-4">
+                        <h3 class="font-sans text-xs tracking-[0.25em] text-gold uppercase mb-4">Cuenta Regresiva Para Nuestra Cita</h3>
+                        <div class="grid grid-cols-4 gap-2 sm:gap-4 max-w-lg mx-auto">
+                            <div class="bg-wine-950/80 border border-gold/30 rounded-lg p-3">
+                                <span id="days" class="font-serif text-2xl sm:text-4xl text-gold font-bold block">00</span>
+                                <span class="text-[10px] sm:text-xs text-cream/70 uppercase tracking-wider">Días</span>
+                            </div>
+                            <div class="bg-wine-950/80 border border-gold/30 rounded-lg p-3">
+                                <span id="hours" class="font-serif text-2xl sm:text-4xl text-gold font-bold block">00</span>
+                                <span class="text-[10px] sm:text-xs text-cream/70 uppercase tracking-wider">Horas</span>
+                            </div>
+                            <div class="bg-wine-950/80 border border-gold/30 rounded-lg p-3">
+                                <span id="minutes" class="font-serif text-2xl sm:text-4xl text-gold font-bold block">00</span>
+                                <span class="text-[10px] sm:text-xs text-cream/70 uppercase tracking-wider">Min</span>
+                            </div>
+                            <div class="bg-wine-950/80 border border-gold/30 rounded-lg p-3">
+                                <span id="seconds" class="font-serif text-2xl sm:text-4xl text-gold font-bold block">00</span>
+                                <span class="text-[10px] sm:text-xs text-cream/70 uppercase tracking-wider">Seg</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="pt-6 flex flex-wrap justify-center gap-4">
+                        <button onclick="triggerCelebration()" class="bg-gradient-to-r from-gold-dark via-gold to-gold-dark text-wine-950 font-semibold px-8 py-3.5 rounded-full shadow-xl hover:shadow-gold/20 hover:scale-105 transition duration-300 text-sm tracking-wider uppercase flex items-center gap-2">
+                            <span>Confirmar Asistencia</span>
+                            <i class="fa-solid fa-heart text-wine-900"></i>
+                        </button>
+                        <a href="#restaurant-info" class="border border-gold/50 text-gold hover:bg-gold/10 font-medium px-6 py-3.5 rounded-full transition duration-300 text-sm tracking-wider uppercase flex items-center gap-2">
+                            <span>Ver Lugar</span>
+                            <i class="fa-solid fa-location-dot"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Restaurant Information Section -->
+        <section id="restaurant-info" class="w-full my-8">
+            <div class="glass-card rounded-2xl p-6 sm:p-8 border border-gold/30">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="text-left space-y-3 flex-1">
+                        <span class="inline-block px-3 py-1 bg-gold/10 border border-gold/30 rounded-full text-gold text-xs tracking-widest uppercase">
+                            Nuestra Cita Romántica
+                        </span>
+                        <h2 class="font-serif text-3xl sm:text-4xl text-cream font-bold">Restaurante Azia</h2>
+                        <p class="text-cream/80 text-sm leading-relaxed">
+                            Una experiencia gastronómica inolvidable para celebrar nuestro amor en una atmósfera sofisticada e íntima.
+                        </p>
+                        <div class="pt-2 space-y-2 text-xs sm:text-sm text-gold/90">
+                            <div class="flex items-center gap-3">
+                                <i class="fa-regular fa-calendar text-gold"></i>
+                                <span>Sábado, 3 de Octubre</span>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <i class="fa-regular fa-clock text-gold"></i>
+                                <span>Cita Nocturna Especial</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="w-full md:w-auto flex flex-col gap-3">
+                        <a href="https://maps.google.com/?q=Restaurante+Azia" target="_blank" rel="noopener noreferrer" class="bg-wine-900 border border-gold/40 hover:border-gold text-gold text-center py-3 px-6 rounded-xl transition duration-300 text-sm flex items-center justify-center gap-2 shadow-lg">
+                            <i class="fa-solid fa-map-pin"></i>
+                            <span>Abrir Mapa en Google Maps</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Toggle Button for GitHub Tutorial -->
+        <div class="mt-8">
+            <button onclick="toggleGithubGuide()" class="text-xs text-gold/70 hover:text-gold border-b border-gold/30 hover:border-gold pb-0.5 transition duration-300 tracking-wider uppercase">
+                <i class="fa-brands fa-github mr-1"></i> ¿Cómo subir esta página a GitHub Pages? (Paso a paso)
+            </button>
+        </div>
+
+        <!-- GitHub Tutorial Section (Collapsible) -->
+        <div id="github-guide" class="hidden w-full my-6 glass-card rounded-xl p-6 sm:p-8 text-left border border-gold/30 transition-all duration-500">
+            <div class="flex justify-between items-center mb-4 border-b border-gold/20 pb-3">
+                <h3 class="font-serif text-2xl text-gold font-bold">Guía para publicar tu web en GitHub Pages</h3>
+                <button onclick="toggleGithubGuide()" class="text-cream/60 hover:text-cream text-lg">&times;</button>
+            </div>
+            
+            <p class="text-xs text-cream/80 mb-6">
+                Sigue estos sencillos pasos para tener tu enlace público listo para compartir por WhatsApp:
+            </p>
+
+            <ol class="space-y-4 text-xs sm:text-sm text-cream/90 list-decimal list-inside">
+                <li class="pl-2">
+                    <strong class="text-gold">Guarda este archivo:</strong> Guarda este archivo en tu computadora con el nombre exacto de <code class="bg-wine-950 px-2 py-0.5 rounded text-gold">index.html</code>.
+                </li>
+                <li class="pl-2">
+                    <strong class="text-gold">Entra a GitHub:</strong> Inicia sesión en <a href="https://github.com" target="_blank" class="underline text-gold">github.com</a> (o crea una cuenta gratuita si no tienes una).
+                </li>
+                <li class="pl-2">
+                    <strong class="text-gold">Crea un nuevo repositorio:</strong> Haz clic en el botón verde <strong>"New"</strong> o en el símbolo <strong>"+"</strong> arriba a la derecha. Nómbralo por ejemplo <code class="bg-wine-950 px-2 py-0.5 rounded text-gold">aniversario</code>. Asegúrate de marcarlo como <strong>Public</strong> (Público).
+                </li>
+                <li class="pl-2">
+                    <strong class="text-gold">Sube el archivo index.html:</strong> En la pantalla que aparece, busca la opción que dice <em>"uploading an existing file"</em>. Arrastra tu archivo <code class="bg-wine-950 px-2 py-0.5 rounded text-gold">index.html</code> y presiona el botón verde <strong>"Commit changes"</strong>.
+                </li>
+                <li class="pl-2">
+                    <strong class="text-gold">Activa GitHub Pages:</strong>
+                    <ul class="list-disc list-inside ml-6 mt-2 space-y-1 text-cream/75">
+                        <li>Ve a la pestaña <strong>Settings</strong> (Configuración) de tu repositorio.</li>
+                        <li>En el menú lateral izquierdo, haz clic en <strong>Pages</strong>.</li>
+                        <li>En la sección <strong>Build and deployment</strong> / <em>Branch</em>, selecciona la rama <strong>main</strong> (o <em>master</em>) y haz clic en <strong>Save</strong>.</li>
+                    </ul>
+                </li>
+                <li class="pl-2">
+                    <strong class="text-gold">¡Listo!:</strong> Espera unos 1 a 2 minutos, recarga la página y arriba te aparecerá un recuadro verde con tu enlace público (algo como: <code class="bg-wine-950 px-2 py-0.5 rounded text-gold">https://tu-usuario.github.io/aniversario/</code>). ¡Copia ese link y envíaselo!
+                </li>
+            </ol>
+        </div>
+
+    </main>
+
+    <footer class="w-full py-6 text-center text-xs text-cream/40 z-20">
+        Hecho con ❤️️ para una ocasión inolvidable
+    </footer>
+
+    <script>
+        // Interactive reveal function
+        function revealInvitation() {
+            const closed = document.getElementById('envelope-closed');
+            const content = document.getElementById('invitation-content');
+
+            closed.classList.add('scale-90', 'opacity-0');
+            setTimeout(() => {
+                closed.classList.add('hidden');
+                content.classList.remove('hidden');
+                setTimeout(() => {
+                    content.classList.remove('opacity-0');
+                    triggerCelebration();
+                }, 50);
+            }, 400);
+        }
+
+        // Toggle GitHub Tutorial
+        function toggleGithubGuide() {
+            const guide = document.getElementById('github-guide');
+            guide.classList.toggle('hidden');
+        }
+
+        // Confetti / Heart explosion trigger
+        function triggerCelebration() {
+            const count = 200;
+            const defaults = {
+                origin: { y: 0.7 }
+            };
+
+            function fire(particleRatio, opts) {
+                confetti(Object.assign({}, defaults, opts, {
+                    particleCount: Math.floor(count * particleRatio)
+                }));
+            }
+
+            fire(0.25, {
+                spread: 26,
+                startVelocity: 55,
+                colors: ['#D4AF37', '#AA7C11', '#FAF6F0']
+            });
+            fire(0.2, {
+                spread: 60,
+                colors: ['#58111A', '#D4AF37']
+            });
+            fire(0.35, {
+                spread: 100,
+                decay: 0.91,
+                scalar: 0.8
+            });
+            fire(0.1, {
+                spread: 120,
+                startVelocity: 25,
+                decay: 0.92,
+                colors: ['#D4AF37', '#FAF6F0']
+            });
+        }
+
+        // Target Date Logic: Saturday Oct 3rd
+        const now = new Date();
+        let targetYear = now.getFullYear();
+        
+        // Construct target date for Oct 3
+        let targetDate = new Date(targetYear, 9, 3, 20, 0, 0); // Oct 3 at 20:00 (8 PM)
+
+        // If Oct 3 of this year has already passed, set for next year
+        if (now > targetDate) {
+            targetDate = new Date(targetYear + 1, 9, 3, 20, 0, 0);
+        }
+
+        function updateCountdown() {
+            const currentTime = new Date();
+            const diff = targetDate - currentTime;
+
+            if (diff <= 0) {
+                document.getElementById('days').innerText = '00';
+                document.getElementById('hours').innerText = '00';
+                document.getElementById('minutes').innerText = '00';
+                document.getElementById('seconds').innerText = '00';
+                return;
+            }
+
+            const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const m = Math.floor((diff / 1000 / 60) % 60);
+            const s = Math.floor((diff / 1000) % 60);
+
+            document.getElementById('days').innerText = d < 10 ? '0' + d : d;
+            document.getElementById('hours').innerText = h < 10 ? '0' + h : h;
+            document.getElementById('minutes').innerText = m < 10 ? '0' + m : m;
+            document.getElementById('seconds').innerText = s < 10 ? '0' + s : s;
+        }
+
+        setInterval(updateCountdown, 1000);
+        updateCountdown();
+
+        // Canvas animation for subtle floating petals/sparkles
+        const canvas = document.getElementById('petals-canvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        const particles = [];
+        const particleCount = 25;
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = -20;
+                this.size = Math.random() * 5 + 3;
+                this.speedY = Math.random() * 1 + 0.5;
+                this.speedX = Math.random() * 0.6 - 0.3;
+                this.opacity = Math.random() * 0.5 + 0.3;
+                this.color = Math.random() > 0.5 ? '#D4AF37' : '#B8860B';
+            }
+
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX;
+                if (this.y > canvas.height + 20) {
+                    this.reset();
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        function animatePetals() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animatePetals);
+        }
+
+        window.onload = function() {
+            animatePetals();
+        };
+    </script>
+</body>
+</html>
